@@ -7,7 +7,7 @@
     <string name="timer">Seconds remaining: %1$d</string>
     <string name="times_up">Time\'s up!</string>
     <!-- Treasure hunt -->
-    <string name="begin_navigation">Begin your search for the treasure!</string>
+    <string name="begin_navigation">Begin your Voyage!</string>
     <string name="start_Place_Navigation">Start Navigation!</string>
     <string name="navigation_ended">Navigation Has ended</string>
     <string name="end_the_treasure_hunt">End Navigation</string>
@@ -25,6 +25,7 @@
     <string name="south">South</string>
     <string name="west">West</string>
     <string name="direction">Head %1$s %2$s</string>
+    <string name="buttonnavigate">buttonnavigate</string>
 
 
 </resources>
