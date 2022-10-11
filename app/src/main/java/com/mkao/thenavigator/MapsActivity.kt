@@ -35,6 +35,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        // check whether the location permissions have been granted each time  app launches
+        if (!LocationHelperPermissions.hasPermissionManager(this))
+            LocationHelperPermissions.requestPermissions(this)
+    }
+        //user’s response to the permissions request
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (!LocationHelperPermissions.hasPermissionManager(this)){
+            LocationHelperPermissions.requestPermissions(this)
+        }else
+            prepareMap()
+    }
+
+    private fun prepareMap() {
+        TODO("Not yet implemented")
     }
 
     /**
