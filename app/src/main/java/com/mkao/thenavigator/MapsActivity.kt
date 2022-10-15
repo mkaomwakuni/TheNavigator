@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.LocationServices
 
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -21,6 +22,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.mkao.thenavigator.databinding.ActivityMapsBinding
+import kotlin.random.Random
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -29,7 +31,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var recentLastLocation :Location
     private lateinit var fusedLocation: FusedLocationProviderClient
     private lateinit var binding: ActivityMapsBinding
+    private var DestinLocation: LatLng? =null
+    private lateinit var geofenceclient: GeofencingClient
 
+    companion object{
+        const val MINIMAL_RECO_RADIUS = 6F
+        const val  GEOFENCE_KEY = "Destination"
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         getSupportActionBar()?.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM)
@@ -42,11 +50,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
         fusedLocation = LocationServices.getFusedLocationProviderClient(this)
         // check whether the location permissions have been granted each time  app launches
         if (!LocationHelperPermissions.hasPermissionManager(this))
             LocationHelperPermissions.requestPermissions(this)
-
+        //initialise geoclient
+        geofenceclient = LocationServices.getGeofencingClient(this)
     }
         //user’s response to the permissions request
     override fun onRequestPermissionsResult(
@@ -66,12 +76,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
       if (LocationHelperPermissions.hasPermissionManager(this)){
           mMap.isMyLocationEnabled = true
           //Locate last known locality
-          fusedLocation.lastLocation.addOnSuccessListener { location:Location?
-          ->
+          fusedLocation.lastLocation.addOnSuccessListener { location:Location? ->
               location?.apply {
                   recentLastLocation = location
                   val currentLatitude = LatLng(location.latitude,location.longitude)
-                  mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatitude, 20f))
+                  mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatitude, 20.0f))
               }
           }
       }
@@ -79,12 +88,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        mMap.uiSettings.isZoomControlsEnabled = true
+        prepareMap()
     }
+
     object LocationHelperPermissions {
         private const val  BACKGROUND_LOCATION_PERMISSION = Manifest.permission.ACCESS_BACKGROUND_LOCATION
         private const val  COARSE_LOCATION_PERMISSION = Manifest.permission.ACCESS_COARSE_LOCATION
@@ -110,5 +117,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     COARSE_LOCATION_PERMISSION, BACKGROUND_LOCATION_PERMISSION),0)
             }
         }
+    }
+    private fun DestinationLocation (){
+        val desireList = listOf(true, false)
+        var desireplace = desireList.random()
+        val destinationLat = if (desireplace) recentLastLocation.latitude + Random.nextFloat()
+        else
+            recentLastLocation.latitude - Random.nextFloat()
+        desireplace = desireList.random()
+        val destinationLong = if (desireplace) recentLastLocation.longitude + Random.nextFloat()
+        else
+            recentLastLocation.longitude - Random.nextFloat()
+        DestinLocation = LatLng(destinationLat, destinationLong)
     }
 }
